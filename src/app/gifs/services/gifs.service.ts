@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '@environments/environment';
 import { GiphyResponse } from '../interfaces/giphy.interface';
 import { Gif } from '../interfaces/gif.interface';
@@ -52,11 +52,22 @@ export class GifsService {
 
       }
     ).pipe(
-      // map( ({data})=> data),
-      // map( (items) => GifMapper.mapGiphyItemsToGifArray(items))
+      map( ({data})=> data),
+      map( (items) => GifMapper.mapGiphyItemsToGifArray(items)),
       //alternativa
-      map ( ({data}) => GifMapper.mapGiphyItemsToGifArray(data))
+      // map ( ({data}) => GifMapper.mapGiphyItemsToGifArray(data))
+
+      tap( (items) => {
+        this.searchHistory.update( (history) => ({
+          ...history,
+          [query.toLocaleLowerCase()]:items,
+        }))
+      }),
     )
+  }
+
+  getHistoryGifs( query: string ): Gif[]{
+    return this.searchHistory()[query] ?? [];
   }
 
 }
